@@ -6,16 +6,26 @@
 import sys, socket
 from struct import *
 import random
+import time
 
 def carry_around_add(a, b):
     c = a + b
     return (c & 0xffff) + (c >> 16)
 
+# def checksum(msg):
+#     s = 0
+#     for i in range(0, len(msg), 2):
+#         w = (ord(msg[i]) << 8 ) + ord(msg[i+1])
+#         s = carry_around_add(s, w)
+
+
 def checksum(msg):
     s = 0
     for i in range(0, len(msg), 2):
-        w = (ord(msg[i]) << 8 ) + ord(msg[i+1])
-        s = carry_around_add(s, w)
+        w = (ord(msg[i])<<8) + (ord(msg[i+1]))
+        s = s + w
+
+    s = (s >> 16) + (s & 0xffff)
     return ~s & 0xffff
 
 def get_host_ip():
@@ -50,7 +60,7 @@ def construct_ip_header():
 
 
 def construct_tcp_header(payload_data, tcp_seq, tcp_ack_seq, flags):
-    tcp_sport = 1000	# source port
+    tcp_sport = sys.argv[0]	# source port
     tcp_dport = 80		# destination port
     # tcp_seq = random.randint(1,100000)	# random sequence number
     # tcp_ack_seq = 0		# 32-bit ACK number。这里不准备构建ack包，故设为0
@@ -63,7 +73,7 @@ def construct_tcp_header(payload_data, tcp_seq, tcp_ack_seq, flags):
     tcp_flag_syn = flags[4]
     tcp_flag_fin = flags[5]
 
-    tcp_window_size = 3000
+    tcp_window_size = 6000
     tcp_checksum = 0
     tcp_urgent_ptr = 0
 
@@ -106,6 +116,7 @@ def unpack_data(data):
     source_address = socket.inet_ntoa(iph[8])
 
     destination_address = socket.inet_ntoa(iph[9])
+
     # print iph
     # print source_address
     # print destination_address
@@ -141,7 +152,7 @@ def main():
     global ip_saddr, ip_daddr, ip_protocol, ip_dest
 
     ip_source = get_host_ip()  # local ip
-    ip_dest = socket.gethostbyname('cs5700.ccs.neu.edu')  # try to send a packet to fakebook
+    ip_dest = socket.gethostbyname('www.google.com')  # try to send a packet to fakebook
     print ip_dest
 
     ip_saddr = socket.inet_pton(socket.AF_INET, ip_source)  # 两边的ip地址
@@ -177,19 +188,19 @@ def main():
     seqs, tcp_ack_seq = unpack_data(data)
     print "ack: " + str(seqs)
     #send out ack back
-    tcp_header = construct_tcp_header('', seqc+1, seqs+1, [0, 1, 0, 0, 0, 0])
+    seqc += 1
+    seqs += 1
+    tcp_header = construct_tcp_header('', seqc, seqs, [0, 1, 0, 0, 0, 0])
     packet = ip_header + tcp_header
+    # time.sleep(0.5)
     send_socket.sendto(packet, (ip_dest, 0))
 
-    data = ''
-    while not filter_packet(data):
-        data = received_socket.recv(65565)
-
-    seqs, tcp_ack_seq = unpack_data(data)
-    print "ack: " + str(seqs)
-    tcp_header = construct_tcp_header('Hey FakeBook', seqc + 1, seqs + 1, [0, 0, 0, 0, 0, 0])
-    packet = ip_header + tcp_header + 'Hey FakeBook'
+    request = "GET / HTTP/1.1\r\nHost: cs5700.ccs.neu.edu\r\nAccept: */*\r\nConnection: Keep-Alive\r\nUser-Agent: curl/7.58.0\r\n\r\n"
+    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 0, 0, 0, 0, 0])
+    packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
+
+
 
 ip_saddr = ''
 ip_daddr = ''
