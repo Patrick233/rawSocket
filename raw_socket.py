@@ -29,7 +29,8 @@ def filter_packet(data):
 
     return True
 
-def main():
+def main(url):
+
     try:
         send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
         received_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
@@ -37,9 +38,10 @@ def main():
         print 'Socket could not be created. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
         sys.exit()
 
-    global ip_saddr, ip_daddr, ip_protocol, ip_dest
+    global ip_saddr, ip_daddr, ip_protocol, ip_dest, host
 
     ip_source = get_host_ip()  # local ip
+    host = socket.gethostbyname(url)
     ip_dest = socket.gethostbyname(host)  # try to send a packet to fakebook
     print ip_dest
 
@@ -100,9 +102,12 @@ def main():
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
 
+    send_socket.close()
+    received_socket.close()
+
 ip_saddr = ''
 ip_daddr = ''
 ip_protocol = ''
 ip_dest = ''
 
-main()
+main(sys.argv[1])

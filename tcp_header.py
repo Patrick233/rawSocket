@@ -13,8 +13,6 @@ from util import checksum
 def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, tcp_sport, payload_data, tcp_seq, tcp_ack_seq, flags):
     # tcp_sport = 2338
     tcp_dport = 80		# destination port
-    # tcp_seq = random.randint(1,100000)	# random sequence number
-    # tcp_ack_seq = 0		# 32-bit ACK number。这里不准备构建ack包，故设为0
     tcp_data_offset = 5	# 和ip header一样，没option field
     # tcp flags
     tcp_flag_urg = flags[0]
@@ -28,14 +26,14 @@ def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, tcp_sport, payload_dat
     tcp_checksum = 0
     tcp_urgent_ptr = 0
 
-    # 继续合并small fields
+    # pack small fields
     tcp_offset_reserv = (tcp_data_offset << 4)
     tcp_flags = tcp_flag_fin + (tcp_flag_syn << 1) + (tcp_flag_rst << 2) + (tcp_flag_psh <<3) + (tcp_flag_ack << 4) + (tcp_flag_urg << 5)
 
-    # 按上面描述的结构，构建tcp header。
+    # construct tcp header。
     tcp_header = pack('!HHLLBBHHH' , tcp_sport, tcp_dport, tcp_seq, tcp_ack_seq, tcp_offset_reserv, tcp_flags, tcp_window_size, tcp_checksum, tcp_urgent_ptr)
 
-    # 构建pseudo ip header
+    # pseudo ip header
     psh_saddr = ip_saddr
     psh_daddr = ip_daddr
     psh_reserved = 0
@@ -43,7 +41,7 @@ def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, tcp_sport, payload_dat
     psh_tcp_len = len(tcp_header) + len(payload_data)
     psh = pack('!4s4sBBH', psh_saddr, psh_daddr, psh_reserved, psh_protocol, psh_tcp_len)
 
-    # 创建最终用于checksum的内容
+    # final check sum
     chk = psh + tcp_header + payload_data
 
     # 必要时追加1字节的padding
@@ -52,7 +50,7 @@ def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, tcp_sport, payload_dat
 
     tcp_checksum = checksum(chk)
 
-    # 重新构建tcp header，把checksum结果填进去
+    # checksum again
     tcp_header = pack('!HHLLBBHHH' , tcp_sport, tcp_dport, tcp_seq, tcp_ack_seq, tcp_offset_reserv, tcp_flags, tcp_window_size, tcp_checksum, tcp_urgent_ptr)
     return tcp_header
 
