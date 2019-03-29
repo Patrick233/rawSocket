@@ -24,6 +24,9 @@ def filter_packet(data):
     if source_address!= ip_dest:
         return False
 
+    if validate_incoming(data, host):
+        print "Invalid packet, IP check fail"
+
     return True
 
 def main():

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*
 from struct import *
+import socket
+from util import *
 
 def construct_ip_header(ip_saddr, ip_daddr, ip_protocol):
     # ip header
@@ -25,3 +27,17 @@ def unpack_ip(packet):
     ip_ver_ihl, ip_dscp, ip_total_len, ip_id, ip_frag_offset, ip_ttl, ip_protocol, ip_checksum, ip_saddr, ip_daddr = unpack('!BBHHHBBH4s4s', packet)
     return (ip_ver_ihl, ip_dscp, ip_total_len, ip_id, ip_frag_offset, ip_ttl, ip_protocol,
                      ip_checksum, ip_saddr, ip_daddr)
+
+
+def validate_incoming(data, host):
+    header = unpack_ip(data)
+    # validate that the incoming packet has the correct version
+    check_version = header[0] >> 4 == 4
+    # validate that the incoming packet has the correct protocol
+    check_protocol = header[6] == socket.IPPROTO_TCP
+    # validate that the incoming packet comes from valid source
+    check_source = socket.inet_ntoa(header[8]) == socket.gethostbyname(host)
+    # validate checksum
+    check_header_checksum = header[7] == checksum(data)
+
+    return check_version and check_protocol and check_source and check_source and check_header_checksum
