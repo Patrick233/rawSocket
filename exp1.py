@@ -152,7 +152,7 @@ def main():
     global ip_saddr, ip_daddr, ip_protocol, ip_dest
 
     ip_source = get_host_ip()  # local ip
-    ip_dest = socket.gethostbyname('www.google.com')  # try to send a packet to fakebook
+    ip_dest = socket.gethostbyname('cs5700.ccs.neu.edu')  # try to send a packet to fakebook
     print ip_dest
 
     ip_saddr = socket.inet_pton(socket.AF_INET, ip_source)  # 两边的ip地址
@@ -196,7 +196,7 @@ def main():
     send_socket.sendto(packet, (ip_dest, 0))
 
     request = "GET / HTTP/1.1\r\nHost: cs5700.ccs.neu.edu\r\nAccept: */*\r\nConnection: Keep-Alive\r\nUser-Agent: curl/7.58.0\r\n\r\n"
-    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 0, 0, 0, 0, 0])
+    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 1, 0, 0, 0, 0])
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
 
