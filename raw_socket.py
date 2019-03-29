@@ -24,7 +24,7 @@ def filter_packet(data):
     if source_address!= ip_dest:
         return False
 
-    if validate_incoming(data, host):
+    if validate_incoming(data[0:20], host):
         print "Invalid packet, IP check fail"
 
     return True
@@ -89,7 +89,7 @@ def main():
             seqs, tcp_ack_seq, tcp_flags = unpack_tcp(data)
             tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, request, seqc, seqs + 1, [0, 1, 0, 0, 0, 0])
             packet = ip_header + tcp_header + request
-            send_socket.sendto(packet, (ip_dest, 0))
+            #send_socket.sendto(packet, (ip_dest, 0))
             if tcp_flags[5] == 1:
                 break
 
