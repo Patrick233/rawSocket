@@ -116,9 +116,31 @@ def unpack_tcp(data):
     tch = unpack('!HHLLBBHHH', tcp_header)
     tcp_seq = tch[2]
     tcp_ack_seq = tch[3]
-    tcp_flags = tch[5]
-    # print tch
+    off_reserved = tch[4]
+    tch_len = off_reserved >> 4
+
+    tcp_flags = get_tcp_flags(tch[5])
+
     return tcp_seq, tcp_ack_seq, tcp_flags
+
+
+def get_tcp_flags(flags):
+    C = flags >> 7
+    E = flags & 0x40
+    E >>= 6
+    U = flags & 0x20
+    U >>= 5
+    A = flags & 0x10
+    A >>= 4
+    P = flags & 0x8
+    P >>= 3
+    R = flags & 0x4
+    R >>= 2
+    S = flags & 0x2
+    S >>= 1
+    F = flags & 0x1
+
+    return [U, A, P, R, S, F]
 
 def unpack_http(data):
 
