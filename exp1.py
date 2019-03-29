@@ -216,12 +216,13 @@ def main():
     send_socket.sendto(packet, (ip_dest, 0))
 
     request = "GET / HTTP/1.1\r\nHost: cs5700.ccs.neu.edu\r\nAccept: */*\r\nConnection: Keep-Alive\r\nUser-Agent: curl/7.58.0\r\n\r\n"
-    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 0, 1, 0, 0, 0])
+    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 1, 1, 0, 0, 0])
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
     print 'sent http'
     http_buffer = ''
 
+    #TODO: if request send back by multiple packet, should respond by ACK
     while True:
         data = received_socket.recv(65565)
         if filter_packet(data):
@@ -231,6 +232,12 @@ def main():
                 break
 
     print http_buffer
+
+    #close connection here
+    tcp_header = construct_tcp_header(request, seqc+1, seqs+1, [0, 1, 0, 0, 0, 0])
+    packet = ip_header + tcp_header + request
+    send_socket.sendto(packet, (ip_dest, 0))
+
 ip_saddr = ''
 ip_daddr = ''
 ip_protocol = ''
