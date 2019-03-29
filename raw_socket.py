@@ -9,10 +9,10 @@ import random
 from ip_header import *
 from tcp_header import *
 from  http_header import *
-from util import get_host_ip
+from util import *
 
 
-host, path = urlparse(sys.argv[1])
+host, path = parse_URL(sys.argv[1])
 
 
 def filter_packet(data):
@@ -119,7 +119,8 @@ def main():
         ipHdr = unpack("!2sH8s4s4s", ipHeader)
         recv_length = ipHdr[1] - 40
         tcpHdr = unpack('!HHLLBBHHH', tcpHeader)
-        fin_ack_psh_flag = tcpHdr[5] & 25
+        # fin_ack_psh_flag = tcpHdr[5] & 25
+        flags = get_tcp_flags(tcpHdr[5])
         new_seq = int(tcpHdr[3])
         new_ack = int(tcpHdr[2])
         if (recv_length != 0):  # segment that contains a payload
@@ -129,7 +130,8 @@ def main():
             # if (verify_checksum(recvPacket, recv_length) == True):  # verify checksum
             send_ack(ip_header, send_socket, new_seq, new_ack + recv_length, port)
 
-        if (fin_ack_psh_flag == 25):  # upon receiving FIN/PSH flag,
+        # if (fin_ack_psh_flag == 25):  # upon receiving FIN/PSH flag,
+        if(flags[5] == 1):
             tear_down_success_flag = 1  # gracefully tearing down the conn
             send_fin(ip_header, send_socket, new_seq, new_ack+recv_length+1, port)
 
