@@ -228,13 +228,16 @@ def main():
         if filter_packet(data):
             http_buffer += data
             seqs, tcp_ack_seq, tcp_flags = unpack_tcp(data)
+            tcp_header = construct_tcp_header(request, seqc, seqs + 1, [0, 1, 0, 0, 0, 0])
+            packet = ip_header + tcp_header + request
+            send_socket.sendto(packet, (ip_dest, 0))
             if tcp_flags[5] == 1:
                 break
 
     print http_buffer
 
     #close connection here
-    tcp_header = construct_tcp_header(request, seqc+1, seqs+1, [0, 1, 0, 0, 0, 0])
+    tcp_header = construct_tcp_header(request, seqc, seqs+1, [0, 1, 0, 0, 0, 0])
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
 
