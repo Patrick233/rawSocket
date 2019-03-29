@@ -10,9 +10,8 @@ from util import checksum
     # tcp_flag_syn = flags[4]
     # tcp_flag_fin = flags[5]
 
-def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, payload_data, tcp_seq, tcp_ack_seq, flags):
-    #tcp_sport = int(sys.argv[1])	# source port
-    tcp_sport = 2338
+def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, tcp_sport, payload_data, tcp_seq, tcp_ack_seq, flags):
+    # tcp_sport = 2338
     tcp_dport = 80		# destination port
     # tcp_seq = random.randint(1,100000)	# random sequence number
     # tcp_ack_seq = 0		# 32-bit ACK number。这里不准备构建ack包，故设为0

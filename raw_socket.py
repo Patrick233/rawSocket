@@ -51,7 +51,9 @@ def main():
 
     # first hand shake: send out sync
     seqc = random.randint(1,100000)
-    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, '', seqc, 0, [0,0,0,0,1,0])
+    port = send_socket.getsockname()[1]
+    print 'send out on port ' + str(port)
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, '', seqc, 0, [0,0,0,0,1,0])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
 
@@ -67,13 +69,13 @@ def main():
     # third hand shake, send out ack back
     seqc += 1
     seqs += 1
-    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, '', seqc, seqs, [0, 1, 0, 0, 0, 0])
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, '', seqc, seqs, [0, 1, 0, 0, 0, 0])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
 
     # send out http request
     request = construct_http_header(host)
-    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, request, seqc, seqs, [0, 1, 1, 0, 0, 0])
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, request, seqc, seqs, [0, 1, 1, 0, 0, 0])
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
     print 'sent http'
@@ -85,7 +87,7 @@ def main():
         if filter_packet(data):
             http_buffer += data
             seqs, tcp_ack_seq, tcp_flags = unpack_tcp(data)
-            tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, request, seqc, seqs + 1, [0, 1, 0, 0, 0, 0])
+            tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, request, seqc, seqs + 1, [0, 1, 0, 0, 0, 0])
             packet = ip_header + tcp_header + request
             send_socket.sendto(packet, (ip_dest, 0))
             if tcp_flags[5] == 1:
@@ -94,7 +96,7 @@ def main():
     print http_buffer
 
     #close connection here
-    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, request, seqc, seqs+1, [0, 1, 0, 0, 0, 0])
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, request, seqc, seqs+1, [0, 1, 0, 0, 0, 0])
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
 
