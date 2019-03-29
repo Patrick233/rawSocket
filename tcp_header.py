@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*
 from struct import *
 from util import checksum
 

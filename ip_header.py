@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*
 from struct import *
 
 def construct_ip_header(ip_saddr, ip_daddr, ip_protocol):
