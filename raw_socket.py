@@ -48,7 +48,7 @@ def main():
 
     # first hand shake: send out sync
     seqc = random.randint(1,100000)
-    tcp_header = construct_tcp_header('', seqc, 0, [0,0,0,0,1,0])
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, '', seqc, 0, [0,0,0,0,1,0])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
 
@@ -64,7 +64,7 @@ def main():
     # third hand shake, send out ack back
     seqc += 1
     seqs += 1
-    tcp_header = construct_tcp_header('', seqc, seqs, [0, 1, 0, 0, 0, 0])
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, '', seqc, seqs, [0, 1, 0, 0, 0, 0])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
 
