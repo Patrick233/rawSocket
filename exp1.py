@@ -73,7 +73,7 @@ def construct_tcp_header(payload_data, tcp_seq, tcp_ack_seq, flags):
     tcp_flag_syn = flags[4]
     tcp_flag_fin = flags[5]
 
-    tcp_window_size = 6000
+    tcp_window_size = 65535
     tcp_checksum = 0
     tcp_urgent_ptr = 0
 
@@ -110,24 +110,15 @@ def unpack_ip(packet):
     print (ip_ver_ihl, ip_dscp, ip_total_len, ip_id, ip_frag_offset, ip_ttl, ip_protocol,
                      ip_checksum, ip_saddr, ip_daddr)
 
-def unpack_data(data):
-    ip_header= data[0:20]
-    iph = unpack('!BBHHHBBH4s4s', ip_header)
-    print iph
-    source_address = socket.inet_ntoa(iph[8])
-
-    destination_address = socket.inet_ntoa(iph[9])
-
-    # print iph
-    # print source_address
-    # print destination_address
+def unpack_tcp(data):
 
     tcp_header = data[20:40]
     tch = unpack('!HHLLBBHHH', tcp_header)
     tcp_seq = tch[2]
     tcp_ack_seq = tch[3]
-    print tch
-    return tcp_seq, tcp_ack_seq
+    tcp_flags = tch[5]
+    # print tch
+    return tcp_seq, tcp_ack_seq, tcp_flags
 
 def unpack_http(data):
 
@@ -192,7 +183,7 @@ def main():
     while not filter_packet(data):
         data = received_socket.recv(65565)
 
-    seqs, tcp_ack_seq = unpack_data(data)
+    seqs, tcp_ack_seq, tcp_flags = unpack_tcp(data)
     print "ack: " + str(seqs)
     #send out ack back
     seqc += 1
@@ -208,16 +199,15 @@ def main():
     send_socket.sendto(packet, (ip_dest, 0))
     print 'sent http'
     http_buffer = ''
-    data = ''
-    while not filter_packet(data):
+
+    while True:
         data = received_socket.recv(65565)
-    
-    count = 0
-    while filter_packet(data) and count < 5:
-        http_buffer += data
-        data = received_socket.recv(65565)
-        count +=1
-    
+        if filter_packet(data):
+            http_buffer += data
+            seqs, tcp_ack_seq, tcp_flags = unpack_tcp(data)
+            if tcp_flags[5] == 1:
+                break
+
     print http_buffer
 ip_saddr = ''
 ip_daddr = ''
