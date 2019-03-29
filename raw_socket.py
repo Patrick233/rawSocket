@@ -10,8 +10,9 @@ from ip_header import *
 from tcp_header import *
 from  http_header import *
 from util import get_host_ip
+from urlparse import urlparse
 
-host = 'cs5700.ccs.neu.edu'
+host = urlparse(sys.argv[1]).hostname
 def filter_packet(data):
     global ip_dest
     if data == '': return False
@@ -29,7 +30,7 @@ def filter_packet(data):
 
     return True
 
-def main(url):
+def main():
 
     try:
         send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
@@ -41,7 +42,7 @@ def main(url):
     global ip_saddr, ip_daddr, ip_protocol, ip_dest, host
 
     ip_source = get_host_ip()  # local ip
-    host = socket.gethostbyname(url)
+    # host = socket.gethostbyname(url)
     ip_dest = socket.gethostbyname(host)  # try to send a packet to fakebook
     print ip_dest
 
@@ -109,5 +110,5 @@ ip_saddr = ''
 ip_daddr = ''
 ip_protocol = ''
 ip_dest = ''
-
-main(sys.argv[1])
+print host
+main()
