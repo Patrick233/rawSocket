@@ -113,6 +113,7 @@ def unpack_ip(packet):
 def unpack_data(data):
     ip_header= data[0:20]
     iph = unpack('!BBHHHBBH4s4s', ip_header)
+    print iph
     source_address = socket.inet_ntoa(iph[8])
 
     destination_address = socket.inet_ntoa(iph[9])
@@ -125,6 +126,7 @@ def unpack_data(data):
     tch = unpack('!HHLLBBHHH', tcp_header)
     tcp_seq = tch[2]
     tcp_ack_seq = tch[3]
+    print tch
     return tcp_seq, tcp_ack_seq
 
 def unpack_http(data):
@@ -201,16 +203,22 @@ def main():
     send_socket.sendto(packet, (ip_dest, 0))
 
     request = "GET / HTTP/1.1\r\nHost: cs5700.ccs.neu.edu\r\nAccept: */*\r\nConnection: Keep-Alive\r\nUser-Agent: curl/7.58.0\r\n\r\n"
-    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 1, 0, 0, 0, 0])
+    tcp_header = construct_tcp_header(request, seqc, seqs, [0, 0, 1, 0, 0, 0])
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
-
+    print 'sent http'
+    http_buffer = ''
     data = ''
     while not filter_packet(data):
         data = received_socket.recv(65565)
-
-    unpack_http(data)
-
+    
+    count = 0
+    while filter_packet(data) and count < 5:
+        http_buffer += data
+        data = received_socket.recv(65565)
+        count +=1
+    
+    print http_buffer
 ip_saddr = ''
 ip_daddr = ''
 ip_protocol = ''
