@@ -127,6 +127,11 @@ def unpack_data(data):
     tcp_ack_seq = tch[3]
     return tcp_seq, tcp_ack_seq
 
+def unpack_http(data):
+
+    http = data[40:]
+    print http
+
 def filter_packet(data):
     global ip_dest
     if data == '': return False
@@ -200,7 +205,11 @@ def main():
     packet = ip_header + tcp_header + request
     send_socket.sendto(packet, (ip_dest, 0))
 
+    data = ''
+    while not filter_packet(data):
+        data = received_socket.recv(65565)
 
+    unpack_http(data)
 
 ip_saddr = ''
 ip_daddr = ''
