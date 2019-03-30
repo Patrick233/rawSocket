@@ -138,6 +138,9 @@ def main():
         http_buffer = http_buffer + data[key]
 
     print http_buffer
+    f = open(sys.argv[1]+".txt", "a")
+    f.write(http_buffer)
+    f.close()
 
     send_socket.close()
     received_socket.close()
