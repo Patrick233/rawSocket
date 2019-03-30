@@ -138,7 +138,13 @@ def main():
         http_buffer = http_buffer + data[key]
 
     print http_buffer
-    f = open(sys.argv[1]+".txt", "a")
+
+    # write to file
+    filename = ""
+    for s in sys.argv[1].split('.'):
+        filename += s
+
+    f = open(filename+".txt", "a")
     f.write(http_buffer)
     f.close()
 
