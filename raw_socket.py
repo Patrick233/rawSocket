@@ -144,7 +144,7 @@ def main():
     for s in sys.argv[1].split('.'):
         filename += s
 
-    f = open(filename+".txt", "a")
+    f = open(filename+".txt", "w")
     f.write(http_buffer)
     f.close()
 
