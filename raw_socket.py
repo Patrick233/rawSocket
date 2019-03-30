@@ -47,7 +47,7 @@ def send_ack(ip_header, send_socket, seqc, seqs, port):
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
 
-def send_fin(ip_header, send_socket, seqc, seqs, port):
+def send_fin_ack(ip_header, send_socket, seqc, seqs, port):
     tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, '', seqc, seqs, [0, 1, 0, 0, 0, 1])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
@@ -131,8 +131,7 @@ def main():
         # if (fin_ack_psh_flag == 25):  # upon receiving FIN/PSH flag,
         if(flags[5] == 1):
             tear_down_success_flag = 1  # gracefully tearing down the conn
-            send_fin(ip_header, send_socket, new_seq, new_ack+recv_length+1, port)
-
+            send_fin_ack(ip_header, send_socket, new_seq, new_ack+recv_length+1, port)
 
     for key in sorted(data):
         http_buffer = http_buffer + data[key]
