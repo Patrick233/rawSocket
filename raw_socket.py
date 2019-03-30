@@ -103,7 +103,6 @@ def time_out_for_thread(index, len):
         slow_start_flg = 1  # enter slow start phase
     thread.exit()
 
-
 def get_received_packet(rx_sock, port):
     global ip_dest
     sourceIP = ""
@@ -141,7 +140,7 @@ def main():
     ip_header = construct_ip_header(ip_saddr, ip_daddr, ip_protocol)
 
     # first hand shake: send out sync
-    port = send_socket.getsockname()[1]
+    port = random.randint(1000, 5000)
     seqc = random.randint(1, 100000)
     send_sync(ip_header, send_socket, seqc, port)
 
@@ -162,7 +161,7 @@ def main():
     # send out http with basic congestion control and mss = 1000 and start cws = 3
     #  simple_congestion(send_socket, ip_header, request, seqs, seqc, 3, 1000)
     send_http(ip_header, send_socket, seqc, seqs, request, port)
-    send_fin_ack(ip_header, send_socket, seqc, seqs, request, port)
+
     http_buffer = ''
 
     data = {}  # dictionary to maintain the payload
@@ -170,7 +169,8 @@ def main():
 
     while (tear_down_success_flag != 1):
 
-        recvPacket = get_received_packet(received_socket)
+        # recvPacket = get_received_packet(received_socket, port)
+        recvPacket = recv_packet(received_socket)
         ipHeader = recvPacket[0:20]
         tcpHeader = recvPacket[20:40]
         ipHdr = unpack("!2sH8s4s4s", ipHeader)
@@ -183,7 +183,7 @@ def main():
             unpack_arg = "!" + str(recv_length) + "s"
             app_part = unpack(unpack_arg, recvPacket[40:(recv_length + 40)])
             data[new_ack] = app_part[0]  # key -> ack_no and value -> data
-            if (validate_checksum(recvPacket, recv_length) == True):  # verify checksum
+            if (verify_checksum(recvPacket, recv_length) == True):  # verify checksum
                 send_ack(ip_header, send_socket, new_seq, new_ack + recv_length, port)
 
         # if (fin_ack_psh_flag == 25):  # upon receiving FIN/PSH flag,
