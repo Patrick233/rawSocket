@@ -3,9 +3,12 @@ import socket
 from urlparse import urlparse
 import sys
 from struct import *
+
+
 def carry_around_add(a, b):
     c = a + b
     return (c & 0xffff) + (c >> 16)
+
 
 # def checksum(msg):
 #     s = 0
@@ -16,11 +19,12 @@ def carry_around_add(a, b):
 def checksum(msg):
     s = 0
     for i in range(0, len(msg), 2):
-        w = (ord(msg[i])<<8) + (ord(msg[i+1]))
+        w = (ord(msg[i]) << 8) + (ord(msg[i + 1]))
         s = s + w
 
     s = (s >> 16) + (s & 0xffff)
     return ~s & 0xffff
+
 
 def get_host_ip():
     try:
@@ -31,6 +35,7 @@ def get_host_ip():
         s.close()
     print ip
     return ip
+
 
 def parse_URL(url):
     url_obj = urlparse(url)
@@ -44,10 +49,10 @@ def parse_URL(url):
         sys.exit()
     return host, path
 
-def validate_checksum(packet, payload_len):
+
+def verify_checksum(packet, payload_len):
     ipHeader = packet[0:20]
     ipHdr = unpack("!BBHHHBBH4s4s", ipHeader)
-
     placeholder = 0
     tcp_length = ipHdr[2] - 20
     protocol = ipHdr[6]
@@ -59,8 +64,8 @@ def validate_checksum(packet, payload_len):
         payload_len = payload_len + 1
     pack_arg = '!HHLLBBHHH' + str(payload_len) + 's'
     tcpHdr = unpack(unpack_arg, tcpHeader)
-    received_tcp_segment = pack(pack_arg, tcpHdr[0], tcpHdr[1], tcpHdr[2], tcpHdr[3], tcpHdr[4], tcpHdr[5], tcpHdr[6], 0,
-                                tcpHdr[8], tcpHdr[9])
+    received_tcp_segment = pack(pack_arg, tcpHdr[0], tcpHdr[1], tcpHdr[2], tcpHdr[3], tcpHdr[4], tcpHdr[5], tcpHdr[6],
+                                0, tcpHdr[8], tcpHdr[9])
     pseudo_hdr = pack('!4s4sBBH', sourceIP, destIP, placeholder, protocol, tcp_length)  # pseudo header
     total_msg = pseudo_hdr + received_tcp_segment
     checksum_from_packet = tcpHdr[7]
