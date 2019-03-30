@@ -138,6 +138,16 @@ def main():
 
     print http_buffer
 
+    # write to file
+    filename = ""
+    for s in sys.argv[1].split('.'):
+        for s1 in s.split('/'):
+            filename += s1
+
+    f = open(filename+".txt", "w")
+    f.write(http_buffer)
+    f.close()
+
     send_socket.close()
     received_socket.close()
 
