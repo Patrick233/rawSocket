@@ -176,6 +176,7 @@ def main():
     for key in sorted(data):
         http_buffer = http_buffer + data[key]
 
+    http_buffer = http_buffer.split("log\r\n\r\n",1)[1]
     print http_buffer
 
     # write to file
@@ -184,7 +185,7 @@ def main():
         for s1 in s.split('/'):
             filename += s1
 
-    f = open(filename + ".txt", "w")
+    f = open(filename+".log", "w")
     f.write(http_buffer)
     f.close()
 
