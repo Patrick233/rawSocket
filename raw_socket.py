@@ -142,7 +142,7 @@ def main():
     # write to file
     filename = ""
     for s in sys.argv[1].split('.'):
-        for s1 in sys.argv[1].split('/'):
+        for s1 in s.split('/'):
             filename += s1
 
     f = open(filename+".txt", "w")
