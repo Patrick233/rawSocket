@@ -146,7 +146,7 @@ def main():
         for s1 in s.split('/'):
             filename += s1
 
-    f = open(filename+".txt", "w")
+    f = open(filename+".log", "w")
     f.write(http_buffer)
     f.close()
 
