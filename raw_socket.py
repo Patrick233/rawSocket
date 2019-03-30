@@ -103,22 +103,6 @@ def time_out_for_thread(index, len):
         slow_start_flg = 1  # enter slow start phase
     thread.exit()
 
-def get_received_packet(rx_sock, port):
-    global ip_dest
-    sourceIP = ""
-    dest_port = ""
-    # loop until we get the packet destined for our port and IP addr
-    while (sourceIP != str(ip_dest) and dest_port != str(port) or sourceIP != "" and dest_port != ""):
-        recvPacket = rx_sock.recv(65565)
-        ipHeader = recvPacket[0:20]
-        ipHdr = unpack("!2sH8s4s4s", ipHeader)  # unpacking to get IP header
-        sourceIP = socket.inet_ntoa(ipHdr[3])
-        tcpHeader = recvPacket[20:40]  # unpacking to get TCP header
-        tcpHdr = unpack('!HHLLBBHHH', tcpHeader)
-        dest_port = str(tcpHdr[1])
-        dest_port = ""
-    return recvPacket
-
 def main():
     try:
         send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
@@ -183,8 +167,7 @@ def main():
             unpack_arg = "!" + str(recv_length) + "s"
             app_part = unpack(unpack_arg, recvPacket[40:(recv_length + 40)])
             data[new_ack] = app_part[0]  # key -> ack_no and value -> data
-            if (verify_checksum(recvPacket, recv_length) == True):  # verify checksum
-                send_ack(ip_header, send_socket, new_seq, new_ack + recv_length, port)
+            send_ack(ip_header, send_socket, new_seq, new_ack + recv_length, port)
 
         # if (fin_ack_psh_flag == 25):  # upon receiving FIN/PSH flag,
         if (flags[5] == 1):
@@ -197,13 +180,12 @@ def main():
     http_buffer = http_buffer.split("log\r\n\r\n",1)[1]
     print http_buffer
 
+    arr = path.split('/')
+    file_name = arr[-1]
     # write to file
-    filename = ""
-    for s in sys.argv[1].split('.'):
-        for s1 in s.split('/'):
-            filename += s1
-
-    f = open(filename+".log", "w")
+    if not file_name:  # get the file name to be created
+        file_name = "index.html"
+    f = open(file_name, "w")
     f.write(http_buffer)
     f.close()
 
