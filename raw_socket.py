@@ -86,7 +86,7 @@ def simple_congestion(send_socket, ip_header, pay_load, seqs, seqc, cwnd, mss):
     else:
         buffer = pay_load[current_idx:]
         last_segment = 1
-    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, send_socket.getsockname()[1], buffer, seqc, seqs + 1,
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, send_socket.getsockname()[1], buffer, seqc, seqs,
                                       [0, 1, 1, 0, 0, 0])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
@@ -144,7 +144,8 @@ def main():
     # send out http request
     request = construct_http_header(host, path)
     # send out http with basic congestion control and mss = 1000 and start cws = 3
-    simple_congestion(send_socket, ip_header, request, seqs, seqc, 3, 1000)
+    #  simple_congestion(send_socket, ip_header, request, seqs, seqc, 3, 1000)
+    send_http(ip_header, send_socket, seqc, seqs, request, port)
 
     http_buffer = ''
 
