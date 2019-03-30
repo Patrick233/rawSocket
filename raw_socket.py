@@ -137,6 +137,7 @@ def main():
     for key in sorted(data):
         http_buffer = http_buffer + data[key]
 
+    http_buffer = http_buffer.split('\r\n\r\n',1)[1]
     print http_buffer
 
     # write to file
