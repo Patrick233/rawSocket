@@ -86,7 +86,8 @@ def simple_congestion(send_socket, ip_header, pay_load, seqs, seqc, cwnd, mss):
     else:
         buffer = pay_load[current_idx:]
         last_segment = 1
-    tcp_header = construct_tcp_header(seqc, seqs + 1, 1, 0, last_segment, buffer)
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, send_socket.getsockname()[1], buffer, seqc, seqs + 1,
+                                      [0, 1, 1, 0, 0, 0])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
     thread.start_new_thread(time_out_for_thread,
