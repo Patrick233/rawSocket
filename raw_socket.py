@@ -11,9 +11,7 @@ from tcp_header import *
 from  http_header import *
 from util import *
 
-
 host, path = parse_URL(sys.argv[1])
-
 
 def filter_packet(data):
     global ip_dest
@@ -50,7 +48,7 @@ def send_ack(ip_header, send_socket, seqc, seqs, port):
     send_socket.sendto(packet, (ip_dest, 0))
 
 def send_fin(ip_header, send_socket, seqc, seqs, port):
-    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, '', seqc, seqs, [0, 0, 0, 0, 0, 1])
+    tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, '', seqc, seqs, [0, 1, 0, 0, 0, 1])
     packet = ip_header + tcp_header
     send_socket.sendto(packet, (ip_dest, 0))
 
@@ -135,28 +133,11 @@ def main():
             tear_down_success_flag = 1  # gracefully tearing down the conn
             send_fin(ip_header, send_socket, new_seq, new_ack+recv_length+1, port)
 
-    print data
 
-    # # TODO: if request send back by multiple packet, should respond by ACK
-    # while True:
-    #     data = received_socket.recv(65565)
-    #     if filter_packet(data):
-    #         http_buffer += data
-    #         seqs, tcp_ack_seq, tcp_flags = unpack_tcp(data)
-    #         tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, request, seqc, seqs + 1,
-    #                                           [0, 1, 0, 0, 0, 0])
-    #         packet = ip_header + tcp_header + request
-    #         # send_socket.sendto(packet, (ip_dest, 0))
-    #         if tcp_flags[5] == 1:
-    #             break
-    #
-    # print http_buffer
-    #
-    # # close connection here
-    # tcp_header = construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, port, request, seqc, seqs + 1,
-    #                                   [0, 1, 0, 0, 0, 0])
-    # packet = ip_header + tcp_header + request
-    # send_socket.sendto(packet, (ip_dest, 0))
+    for key in sorted(data):
+        http_buffer = http_buffer + data[key]
+
+    print http_buffer
 
     send_socket.close()
     received_socket.close()
