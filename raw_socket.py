@@ -142,7 +142,8 @@ def main():
     # write to file
     filename = ""
     for s in sys.argv[1].split('.'):
-        filename += s
+        for s1 in sys.argv[1].split('/'):
+            filename += s1
 
     f = open(filename+".txt", "w")
     f.write(http_buffer)
