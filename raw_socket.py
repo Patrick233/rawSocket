@@ -104,6 +104,22 @@ def time_out_for_thread(index, len):
     thread.exit()
 
 
+def get_received_packet(rx_sock, port):
+    global ip_dest
+    sourceIP = ""
+    dest_port = ""
+    # loop until we get the packet destined for our port and IP addr
+    while (sourceIP != str(ip_dest) and dest_port != str(port) or sourceIP != "" and dest_port != ""):
+        recvPacket = rx_sock.recv(65565)
+        ipHeader = recvPacket[0:20]
+        ipHdr = unpack("!2sH8s4s4s", ipHeader)  # unpacking to get IP header
+        sourceIP = socket.inet_ntoa(ipHdr[3])
+        tcpHeader = recvPacket[20:40]  # unpacking to get TCP header
+        tcpHdr = unpack('!HHLLBBHHH', tcpHeader)
+        dest_port = str(tcpHdr[1])
+        dest_port = ""
+    return recvPacket
+
 def main():
     try:
         send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
@@ -146,7 +162,7 @@ def main():
     # send out http with basic congestion control and mss = 1000 and start cws = 3
     #  simple_congestion(send_socket, ip_header, request, seqs, seqc, 3, 1000)
     send_http(ip_header, send_socket, seqc, seqs, request, port)
-
+    send_fin_ack(ip_header, send_socket, seqc, seqs, request, port)
     http_buffer = ''
 
     data = {}  # dictionary to maintain the payload
@@ -154,7 +170,7 @@ def main():
 
     while (tear_down_success_flag != 1):
 
-        recvPacket = recv_packet(received_socket)
+        recvPacket = get_received_packet(received_socket)
         ipHeader = recvPacket[0:20]
         tcpHeader = recvPacket[20:40]
         ipHdr = unpack("!2sH8s4s4s", ipHeader)
