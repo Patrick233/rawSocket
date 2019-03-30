@@ -2,6 +2,7 @@
 from struct import *
 import socket
 from util import *
+import random
 
 def construct_ip_header(ip_saddr, ip_daddr, ip_protocol):
     # ip header
@@ -9,7 +10,7 @@ def construct_ip_header(ip_saddr, ip_daddr, ip_protocol):
     ip_ihl = 5  # Header Length =5, 表示无options部分
     ip_dscp = 0  # 以前叫tos，现在叫dscp
     ip_total_len = 0  # left for kernel to fill
-    ip_id = 22222  # fragment相关，随便写个
+    ip_id = random.randint(10000,50000)  # randomly pick ID
     ip_frag_offset = 0  # fragment相关
     ip_ttl = 255  # *nix下TTL一般是255
     ip_checksum = 0  # left for kernel to fill

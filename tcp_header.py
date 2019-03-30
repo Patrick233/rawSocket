@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 from struct import *
+import socket
 from util import checksum
 
     # flags
@@ -22,7 +23,7 @@ def construct_tcp_header(ip_saddr, ip_daddr, ip_protocol, tcp_sport, payload_dat
     tcp_flag_syn = flags[4]
     tcp_flag_fin = flags[5]
 
-    tcp_window_size = 65535
+    tcp_window_size = socket.htons(1500)
     tcp_checksum = 0
     tcp_urgent_ptr = 0
 
