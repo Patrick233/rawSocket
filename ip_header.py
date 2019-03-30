@@ -29,7 +29,7 @@ def unpack_ip(packet):
                      ip_checksum, ip_saddr, ip_daddr)
 
 
-def validate_incoming(data, host):
+def validate_incoming_ip(data, host):
     header = unpack_ip(data)
     # validate that the incoming packet has the correct version
     check_version = header[0] >> 4 == 4
